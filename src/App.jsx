@@ -1,38 +1,132 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from './utils/supabase';
 import './App.css';
 
-// --- 1. คอมโพเนนต์ Sidebar ---
-const Sidebar = () => {
+// --- 1. หน้า Login ---
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
+    else navigate('/');
+    setLoading(false);
+  };
+
+  return (
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '400px' }}>
+        <h3 className="text-center text-pastel-green mb-4 fw-bold">🌿 เข้าสู่ระบบ</h3>
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <label className="form-label">อีเมล</label>
+            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="mb-4">
+            <label className="form-label">รหัสผ่าน</label>
+            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <button type="submit" className="btn btn-pastel w-100 mb-3" disabled={loading}>
+            {loading ? 'กำลังโหลด...' : 'เข้าสู่ระบบ'}
+          </button>
+          <div className="text-center">
+            <span className="text-muted">ยังไม่มีบัญชี? </span>
+            <Link to="/register" className="text-success text-decoration-none fw-bold">สมัครสมาชิก</Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --- 2. หน้า สมัครสมาชิก (Register) ---
+const Register = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      alert('สมัครสมาชิกไม่สำเร็จ: ' + error.message);
+    } else {
+      alert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+      navigate('/login');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '400px' }}>
+        <h3 className="text-center text-pastel-green mb-4 fw-bold">🌿 สมัครสมาชิก</h3>
+        <form onSubmit={handleRegister}>
+          <div className="mb-3">
+            <label className="form-label">อีเมล</label>
+            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="mb-4">
+            <label className="form-label">รหัสผ่าน (ขั้นต่ำ 6 ตัว)</label>
+            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required minLength="6" />
+          </div>
+          <button type="submit" className="btn btn-pastel w-100 mb-3" disabled={loading}>
+            {loading ? 'กำลังโหลด...' : 'ยืนยันการสมัคร'}
+          </button>
+          <div className="text-center">
+            <span className="text-muted">มีบัญชีอยู่แล้ว? </span>
+            <Link to="/login" className="text-success text-decoration-none fw-bold">เข้าสู่ระบบ</Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --- 3. คอมโพเนนต์ Sidebar (เพิ่มปุ่ม Logout) ---
+const Sidebar = ({ onLogout }) => {
   const location = useLocation();
   return (
     <nav className="col-md-3 col-lg-2 d-md-block sidebar collapse px-0">
-      <div className="position-sticky pt-4 px-3">
-        <h5 className="text-pastel-green mb-4 fw-bold text-center mt-2">
-          <span className="me-2 fs-4">🌿</span>สวนทุเรียน
-        </h5>
-        <hr className="text-muted opacity-25" />
-        <ul className="nav flex-column mt-3">
-          <li className="nav-item">
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-              💧 บันทึกการให้น้ำ
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/history" className={`nav-link ${location.pathname === '/history' ? 'active' : ''}`}>
-              🕒 ประวัติทั้งหมด
-            </Link>
-          </li>
-        </ul>
+      <div className="position-sticky pt-4 px-3 d-flex flex-column h-100">
+        <div>
+          <h5 className="text-pastel-green mb-4 fw-bold text-center mt-2">
+            <span className="me-2 fs-4">🌿</span>สวนทุเรียน
+          </h5>
+          <hr className="text-muted opacity-25" />
+          <ul className="nav flex-column mt-3">
+            <li className="nav-item">
+              <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+                💧 บันทึกการให้น้ำ
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/history" className={`nav-link ${location.pathname === '/history' ? 'active' : ''}`}>
+                🕒 ประวัติทั้งหมด
+              </Link>
+            </li>
+          </ul>
+        </div>
+        <div className="mt-auto mb-4 px-2">
+          <button onClick={onLogout} className="btn btn-sm btn-outline-danger w-100 rounded-pill">
+            🚪 ออกจากระบบ
+          </button>
+        </div>
       </div>
     </nav>
   );
 };
 
-// --- 2. หน้า Dashboard (ฟอร์มบันทึกและรายงาน) ---
+// --- 4. หน้า Dashboard (หน้าหลัก) ---
 const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPeriod, editingId, setEditingId, formData, setFormData }) => {
-  
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
@@ -68,7 +162,6 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
 
   return (
     <div className="row">
-      {/* ส่วนฟอร์ม */}
       <div className="col-lg-8 mb-4">
         <div className="card">
           <div className="card-header py-3">
@@ -88,7 +181,6 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
                   <input type="time" name="water_time" className="form-control" value={formData.water_time} onChange={handleChange} required />
                 </div>
               </div>
-
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
                   <label className="form-label">ระยะเวลา (นาที)</label>
@@ -102,7 +194,6 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
                   </select>
                 </div>
               </div>
-
               <div className="row mb-4">
                 <div className="col-md-4 mb-3 mb-md-0">
                   <label className="form-label">ปริมาณน้ำ (ลิตร)</label>
@@ -117,15 +208,12 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
                   <input type="text" name="weather_condition" className="form-control" placeholder="เช่น แดดจัด" value={formData.weather_condition} onChange={handleChange} />
                 </div>
               </div>
-              
               <div className="d-flex gap-2">
                 <button type="submit" className="btn btn-pastel w-100">
                   {editingId ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}
                 </button>
                 {editingId && (
-                  <button type="button" className="btn btn-light w-100" onClick={handleCancel}>
-                    ยกเลิก
-                  </button>
+                  <button type="button" className="btn btn-light w-100" onClick={handleCancel}>ยกเลิก</button>
                 )}
               </div>
             </form>
@@ -133,7 +221,6 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
         </div>
       </div>
 
-      {/* ส่วนรายงาน */}
       <div className="col-lg-4 mb-4">
         <div className="card h-100">
           <div className="card-header py-3">
@@ -160,7 +247,7 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
   );
 };
 
-// --- 3. หน้า History (ตารางประวัติ) ---
+// --- 5. หน้า History (ตารางประวัติ) ---
 const History = ({ logs, fetchLogs, onEdit }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -180,13 +267,7 @@ const History = ({ logs, fetchLogs, onEdit }) => {
     <div className="card">
       <div className="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h5 className="card-title mb-0 fw-bold text-pastel-green">🕒 ประวัติการให้น้ำทั้งหมด</h5>
-        <input 
-          type="text" 
-          className="form-control w-auto" 
-          placeholder="🔍 ค้นหาชื่อแปลง..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <input type="text" className="form-control w-auto" placeholder="🔍 ค้นหาชื่อแปลง..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
       </div>
       <div className="card-body p-0">
         <div className="table-responsive">
@@ -215,11 +296,7 @@ const History = ({ logs, fetchLogs, onEdit }) => {
                   </td>
                 </tr>
               ))}
-              {filteredLogs.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center text-muted py-5">ไม่พบข้อมูล</td>
-                </tr>
-              )}
+              {filteredLogs.length === 0 && <tr><td colSpan="6" className="text-center text-muted py-5">ไม่พบข้อมูล</td></tr>}
             </tbody>
           </table>
         </div>
@@ -228,8 +305,11 @@ const History = ({ logs, fetchLogs, onEdit }) => {
   );
 };
 
-// --- 4. คอมโพเนนต์หลัก ---
+// --- 6. คอมโพเนนต์หลักที่จัดการ Auth และ Routing ---
 function AppContent() {
+  const [session, setSession] = useState(null); // ตัวแปรเก็บสถานะล็อกอิน
+  const [loadingSession, setLoadingSession] = useState(true);
+
   const [logs, setLogs] = useState([]);
   const [zones, setZones] = useState([]);
   const [reports, setReports] = useState([]);
@@ -243,10 +323,26 @@ function AppContent() {
 
   const navigate = useNavigate();
 
+  // เช็คสถานะการล็อกอินตอนเปิดเว็บ
   useEffect(() => {
-    fetchZones();
-    fetchLogs();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (session) {
+      fetchZones();
+      fetchLogs();
+    }
+  }, [session]);
 
   useEffect(() => {
     generateReports(logs, reportPeriod);
@@ -276,6 +372,11 @@ function AppContent() {
     navigate('/'); 
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
   const getWeekNumber = (dateString) => {
     const d = new Date(dateString);
     d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + 4 - (d.getDay() || 7));
@@ -295,25 +396,35 @@ function AppContent() {
     setReports(reportArray);
   };
 
+  if (loadingSession) {
+    return <div className="d-flex justify-content-center align-items-center vh-100">กำลังโหลด...</div>;
+  }
+
   return (
-    <div className="container-fluid overflow-hidden">
-      <div className="row">
-        <Sidebar />
-        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-5 py-5" style={{ minHeight: '100vh', overflowY: 'auto' }}>
-          <Routes>
-            <Route path="/" element={
-              <Dashboard 
-                zones={zones} logs={logs} fetchLogs={fetchLogs} 
-                reports={reports} reportPeriod={reportPeriod} setReportPeriod={setReportPeriod}
-                editingId={editingId} setEditingId={setEditingId}
-                formData={formData} setFormData={setFormData}
-              />
-            } />
-            <Route path="/history" element={<History logs={logs} fetchLogs={fetchLogs} onEdit={handleEditRequest} />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
+    <Routes>
+      {/* Route ที่ไม่ต้องล็อกอิน */}
+      <Route path="/login" element={!session ? <Login /> : <Navigate to="/" />} />
+      <Route path="/register" element={!session ? <Register /> : <Navigate to="/" />} />
+
+      {/* Route ที่ต้องล็อกอิน (Protected Routes) */}
+      <Route path="/*" element={
+        session ? (
+          <div className="container-fluid overflow-hidden">
+            <div className="row">
+              <Sidebar onLogout={handleLogout} />
+              <main className="col-md-9 ms-sm-auto col-lg-10 px-md-5 py-5" style={{ minHeight: '100vh', overflowY: 'auto' }}>
+                <Routes>
+                  <Route path="/" element={<Dashboard zones={zones} logs={logs} fetchLogs={fetchLogs} reports={reports} reportPeriod={reportPeriod} setReportPeriod={setReportPeriod} editingId={editingId} setEditingId={setEditingId} formData={formData} setFormData={setFormData} />} />
+                  <Route path="/history" element={<History logs={logs} fetchLogs={fetchLogs} onEdit={handleEditRequest} />} />
+                </Routes>
+              </main>
+            </div>
+          </div>
+        ) : (
+          <Navigate to="/login" />
+        )
+      } />
+    </Routes>
   );
 }
 
