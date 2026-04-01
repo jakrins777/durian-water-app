@@ -126,7 +126,8 @@ const Sidebar = ({ onLogout }) => {
 };
 
 // --- 4. หน้า Dashboard (หน้าหลัก) ---
-const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPeriod, editingId, setEditingId, formData, setFormData }) => {
+// จุดแก้ที่ 1: รับค่า session เข้ามาเพื่อดึง ID
+const Dashboard = ({ session, zones, logs, fetchLogs, reports, reportPeriod, setReportPeriod, editingId, setEditingId, formData, setFormData }) => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
@@ -139,16 +140,20 @@ const Dashboard = ({ zones, logs, fetchLogs, reports, reportPeriod, setReportPer
       water_volume_liters: formData.water_volume_liters ? parseFloat(formData.water_volume_liters) : null,
       temperature_celsius: formData.temperature_celsius ? parseFloat(formData.temperature_celsius) : null,
       weather_condition: formData.weather_condition || null,
-      user_id: 1 
+      user_id: session.user.id // <-- ใช้ ID ของคนที่ล็อกอินจริง
     };
 
     if (editingId) {
-      await supabase.from('water_logs').update(dataToSubmit).eq('log_id', editingId);
-      alert('อัปเดตข้อมูลเรียบร้อย!');
-      setEditingId(null);
+      const { error } = await supabase.from('water_logs').update(dataToSubmit).eq('log_id', editingId);
+      if (error) alert('อัปเดตข้อมูลไม่สำเร็จ: ' + error.message);
+      else {
+        alert('อัปเดตข้อมูลเรียบร้อย!');
+        setEditingId(null);
+      }
     } else {
-      await supabase.from('water_logs').insert([dataToSubmit]);
-      alert('บันทึกข้อมูลเรียบร้อย!');
+      const { error } = await supabase.from('water_logs').insert([dataToSubmit]);
+      if (error) alert('บันทึกข้อมูลไม่สำเร็จ: ' + error.message);
+      else alert('บันทึกข้อมูลเรียบร้อย!');
     }
 
     setFormData({ water_date: '', water_time: '', duration_minutes: '', zone_id: '', water_volume_liters: '', weather_condition: '', temperature_celsius: '' });
@@ -253,8 +258,9 @@ const History = ({ logs, fetchLogs, onEdit }) => {
 
   const handleDelete = async (log_id) => {
     if (window.confirm('ยืนยันการลบข้อมูลนี้?')) {
-      await supabase.from('water_logs').delete().eq('log_id', log_id);
-      fetchLogs();
+      const { error } = await supabase.from('water_logs').delete().eq('log_id', log_id);
+      if (error) alert('ลบข้อมูลไม่สำเร็จ: ' + error.message);
+      else fetchLogs();
     }
   };
 
@@ -338,7 +344,7 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id) {
       fetchZones();
       fetchLogs();
     }
@@ -353,8 +359,15 @@ function AppContent() {
     if (data) setZones(data);
   };
 
+  // จุดแก้ที่ 2: ดึงเฉพาะข้อมูลของตัวเอง (.eq('user_id', session.user.id))
   const fetchLogs = async () => {
-    const { data } = await supabase.from('water_logs').select('*, zones(zone_name)').order('water_date', { ascending: false });
+    if (!session?.user?.id) return;
+    const { data } = await supabase
+      .from('water_logs')
+      .select('*, zones(zone_name)')
+      .eq('user_id', session.user.id) // <-- เพิ่มบรรทัดนี้เพื่อกรอง User
+      .order('water_date', { ascending: false })
+      .order('water_time', { ascending: false }); // <-- เพิ่มการเรียงลำดับเวลาด้วย
     if (data) setLogs(data);
   };
 
@@ -414,7 +427,8 @@ function AppContent() {
               <Sidebar onLogout={handleLogout} />
               <main className="col-md-9 ms-sm-auto col-lg-10 px-md-5 py-5" style={{ minHeight: '100vh', overflowY: 'auto' }}>
                 <Routes>
-                  <Route path="/" element={<Dashboard zones={zones} logs={logs} fetchLogs={fetchLogs} reports={reports} reportPeriod={reportPeriod} setReportPeriod={setReportPeriod} editingId={editingId} setEditingId={setEditingId} formData={formData} setFormData={setFormData} />} />
+                  {/* จุดแก้ที่ 3: ส่งตัวแปร session เข้าไปใน Dashboard ด้วย */}
+                  <Route path="/" element={<Dashboard session={session} zones={zones} logs={logs} fetchLogs={fetchLogs} reports={reports} reportPeriod={reportPeriod} setReportPeriod={setReportPeriod} editingId={editingId} setEditingId={setEditingId} formData={formData} setFormData={setFormData} />} />
                   <Route path="/history" element={<History logs={logs} fetchLogs={fetchLogs} onEdit={handleEditRequest} />} />
                 </Routes>
               </main>
