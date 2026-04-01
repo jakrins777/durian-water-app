@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
+
+body {
+  background-color: #f4f9f4; /* พื้นหลังสีเขียวพาสเทลอ่อนมาก สบายตา */
+  font-family: 'Sarabun', sans-serif;
+  color: #4a4a4a; /* สีตัวอักษรหลักเป็นเทาเข้มอมน้ำตาล ให้อ่านง่ายแต่ไม่แข็ง */
+}
+
+/* --- แต่ง Sidebar --- */
+.sidebar {
+  background-color: #ffffff;
+  min-height: 100vh;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.03);
+  border-right: none;
+}
+
+.sidebar .nav-link {
+  color: #666;
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #eef7ee;
+  color: #558b6e;
+}
+
+.sidebar .nav-link.active {
+  background-color: #a3d9a5; /* พื้นหลังปุ่ม Sidebar เมนูที่เลือก */
+  color: #1e3b23;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(163, 217, 165, 0.3);
+}
+
+/* --- แต่ง Card พื้นหลังฟอร์ม/ตาราง --- */
+.card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+  background-color: #ffffff;
+  border-bottom: 2px dashed #eef7ee;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+/* --- สีตัวอักษรหลัก (พาสเทล) --- */
+.text-pastel-green {
+  color: #558b6e !important; /* สีเขียวเข้มขึ้นมานิดนึงเพื่อให้อ่านออก */
+}
+
+/* --- แต่งปุ่ม (Buttons) --- */
+.btn-pastel {
+  background-color: #a3d9a5;
+  color: #2b4d32;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s;
+  padding: 10px 20px;
+}
+
+.btn-pastel:hover {
+  background-color: #8bc28d;
+  color: #1e3b23;
+  transform: translateY(-2px);
+}
+
+.btn-pastel-warning {
+  background-color: #ffd8a8; /* สีส้ม/เหลืองพาสเทล สำหรับปุ่มแก้ */
+  color: #8a5a19;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-pastel-warning:hover {
+  background-color: #ffc078;
+}
+
+.btn-pastel-danger {
+  background-color: #ffb3b3; /* สีแดงพาสเทล สำหรับปุ่มลบ */
+  color: #8a2525;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-pastel-danger:hover {
+  background-color: #ff9999;
+}
+
+/* --- แต่ง Input Form --- */
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1px solid #dce8dd;
+  padding: 10px 15px;
+  box-shadow: none;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #a3d9a5;
+  box-shadow: 0 0 0 4px rgba(163, 217, 165, 0.2);
+}
+
+.form-label {
+  font-weight: 500;
+  color: #666;
+}
+
+/* --- แต่งตาราง --- */
+.table-pastel thead th {
+  background-color: #eef7ee;
+  color: #558b6e;
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.table-pastel tbody td {
+  border-bottom: 1px solid #f4f9f4;
+  vertical-align: middle;
+}
+
+/* --- Badge (ป้ายกำกับ) --- */
+.bg-pastel-green {
+  background-color: #a3d9a5 !important;
+  color: #1e3b23 !important;
+  font-weight: 600;
+}
